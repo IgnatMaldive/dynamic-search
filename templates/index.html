@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Search App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+    <script>
+        async function search(query) {
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `query=${query}`,
+            });
+            const results = await response.json();
+            const resultsTable = document.getElementById('results-table');
+            resultsTable.innerHTML = '';
+            if (results.length > 0) {
+                let tableHeader = '<tr>';
+                Object.keys(results[0]).forEach(key => {
+                    tableHeader += `<th>${key}</th>`;
+                });
+                tableHeader += '</tr>';
+                resultsTable.innerHTML += tableHeader;
+                
+                results.forEach(row => {
+                    let tableRow = '<tr>';
+                    Object.values(row).forEach(value => {
+                        tableRow += `<td>${value}</td>`;
+                    });
+                    tableRow += '</tr>';
+                    resultsTable.innerHTML += tableRow;
+                });
+            } else {
+                resultsTable.innerHTML = '<tr><td colspan="100%">No results found</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-query');
+            searchInput.addEventListener('keyup', function() {
+                const query = searchInput.value;
+                search(query);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>CSV Search App</h1>
+    <input type="text" id="search-query" placeholder="Search...">
+    <table id="results-table"></table>
+</body>
+</html>
